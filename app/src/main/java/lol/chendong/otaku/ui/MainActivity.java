@@ -21,6 +21,8 @@ import android.widget.TextView;
 
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +32,11 @@ import lol.chendong.data.meizhi.MeizhiBean;
 import lol.chendong.data.meizhi.MeizhiData;
 import lol.chendong.otaku.BaseActivity;
 import lol.chendong.otaku.R;
-import lol.chendong.otaku.bean.MessageBean;
-import rx.Subscriber;
+import lol.chendong.otaku.adapter.HomeAdapter;
+import rx.Observer;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, IMainView {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     List<MeizhiBean> data = new ArrayList<>();
     private Toolbar toolbar;
@@ -52,13 +54,15 @@ public class MainActivity extends BaseActivity
     private HomeAdapter mAdapter;
     private int dataPage = 1; //数据页码
     private String dataType = MeizhiData.最新;
+    private MaterialSearchView searchView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        //获取默认主页
+        MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
     }
 
     @Override
@@ -73,7 +77,7 @@ public class MainActivity extends BaseActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
+        searchView = (MaterialSearchView) findViewById(R.id.search_view);
 
         //初始化NavigationView里headerView中的控件
         View headerView = navigationView.getHeaderView(0);
@@ -90,45 +94,49 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void initData() {
-
-        getData();
-
+        setGetDataObserver();
         //添加旋转动画效果
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate);
         lac = new LayoutAnimationController(animation);
         lac.setOrder(LayoutAnimationController.ORDER_REVERSE);
         lac.setDelay(0.3f);
         otherButtonLayout.setLayoutAnimation(lac);
-
     }
 
-    private void getData() {
-        MeizhiData.getData().getRoughPicList(dataType, dataPage)
-                .subscribe(new Subscriber<List<MeizhiBean>>() {
-                    @Override
-                    public void onCompleted() {
-                        dataPage++;
-                        refreshLayout.finishLoadmore();
-                        refreshLayout.finishRefreshing();
-                    }
+    /**
+     * 设置数据接收方法
+     */
+    private void setGetDataObserver() {
+        observer = new Observer<List<MeizhiBean>>() {
+            @Override
+            public void onCompleted() {
+                dataPage++;
+                refreshLayout.finishLoadmore();
+                refreshLayout.finishRefreshing();
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+                refreshLayout.finishLoadmore();
+                refreshLayout.finishRefreshing();
+            }
 
-                    @Override
-                    public void onNext(List<MeizhiBean> meizhiBeen) {
-                        data.addAll(meizhiBeen);
-                        if (mAdapter == null) {
-                            mAdapter = new HomeAdapter(MainActivity.this, meizhiBeen);
-                            mRecyclerView.setAdapter(mAdapter);
-                        } else {
-                            mAdapter.addData(data);
-                        }
-                    }
-                });
+            @Override
+            public void onNext(List<MeizhiBean> meizhiBeen) {
+                data.addAll(meizhiBeen);
+                if (mAdapter == null) {
+                    mAdapter = new HomeAdapter(MainActivity.this, meizhiBeen);
+                    mRecyclerView.setAdapter(mAdapter);
+                } else {
+                    mAdapter.addData(data);
+                    Logger.d("添加数据,当前数据量"+data.size());
+                }
+            }
+        };
     }
+
+    private Observer<List<MeizhiBean>> observer;
 
     @Override
     public void initListener() {
@@ -144,9 +152,7 @@ public class MainActivity extends BaseActivity
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
-                dataPage = 1 ;
-                data.clear();
-                getData();
+                refreshData();
             }
 
             @Override
@@ -167,14 +173,69 @@ public class MainActivity extends BaseActivity
 
             }
         });
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                if (query.equals(search)) {
+                    Logger.d("搜索");
+                    dataType = MeizhiData.搜索;
+                    dataPage = 1;
+                    refreshData();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != null&&newText.length() > 0) {
+                    search = newText;
+                }
+                return false;
+            }
+        });
     }
+
+    /**
+     * 刷新数据
+     */
+    private void refreshData() {
+        dataPage = 1;
+        data.clear();
+        getData();
+    }
+
+
+    private void getData() {
+        if (dataType.equals(MeizhiData.台湾) ||
+                dataType.equals(MeizhiData.性感) ||
+                dataType.equals(MeizhiData.推荐) ||
+                dataType.equals(MeizhiData.日本) ||
+                dataType.equals(MeizhiData.最新) ||
+                dataType.equals(MeizhiData.清纯妹纸) ||
+                dataType.equals(MeizhiData.最热)) {
+            MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
+        } else if (dataType.equals(MeizhiData.自拍)) {
+            MeizhiData.getData().getSharelMeizhiList(dataPage).subscribe(observer);
+        } else if (dataType.equals(MeizhiData.搜索)) {
+            if (search != null && search.length() > 0) {
+                MeizhiData.getData().getSearchMeizhiList(search, dataPage).subscribe(observer);
+                Logger.d("搜索:" + search);
+            } else {
+                searchView.showSearch();
+            }
+        }
+    }
+
+    private String search;
 
 
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-
+        } else if (searchView.isSearchOpen()) {
+            searchView.closeSearch();
         } else {
             super.onBackPressed();
         }
@@ -184,13 +245,15 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
+        MenuItem item = menu.findItem(R.id.action_search);
+        searchView.setMenuItem(item);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         switch (id) {
             case R.id.action_search: //搜索
 
@@ -199,32 +262,35 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
+        if (id == R.id.nav_hot) {
+            dataType = MeizhiData.最热;
+        } else if (id == R.id.nav_best) {
+            dataType = MeizhiData.推荐;
+        } else if (id == R.id.nav_new) {
+            dataType = MeizhiData.最新;
+        } else if (id == R.id.nav_sexy) {
+            dataType = MeizhiData.性感;
         } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            dataType = MeizhiData.自拍;
+        } else if (id == R.id.nav_day) {
+            dataType = MeizhiData.最新;
+        } else if (id == R.id.nav_riben) {
+            dataType = MeizhiData.日本;
+        } else if (id == R.id.nav_taiwan) {
+            dataType = MeizhiData.台湾;
+        } else if (id == R.id.nav_qingchun) {
+            dataType = MeizhiData.清纯妹纸;
         }
-
+        refreshData();
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
 
-    @Override
-    public void messageCallbak(MessageBean msg) {
-
-    }
 }

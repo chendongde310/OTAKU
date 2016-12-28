@@ -26,6 +26,7 @@ dependencies {
 
     compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.miguelcatalan:materialsearchview:1.4.0'
 
     compile 'com.facebook.fresco:fresco:1.0.0'
 

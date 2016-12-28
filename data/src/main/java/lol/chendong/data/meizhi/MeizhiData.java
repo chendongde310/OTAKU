@@ -1,5 +1,7 @@
 package lol.chendong.data.meizhi;
 
+import com.orhanobut.logger.Logger;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,7 +31,8 @@ public class MeizhiData {
     public static final String 日本 = "japan/";
     public static final String 台湾 = "taiwan/";
     public static final String 清纯妹纸 = "mm/";
-    private static final String 搜索 = "search/";
+    public static final String 搜索 = "search/";
+    public static final String 自拍 = "";
 
 
     private static MeizhiData ourInstance = new MeizhiData();
@@ -61,6 +64,7 @@ public class MeizhiData {
                 List<MeizhiBean> meizhiBeanList = new ArrayList<>();
                 try {
                     Document doc = Jsoup.connect("http://www.mzitu.com/" + type + "page/" + page).timeout(timeout).get();
+                    Logger.d("http://www.mzitu.com/" + type + "page/" + page);
                     Element content = doc.getElementById("pins");
                     Elements dataList = content.getElementsByTag("li");
                     for (Element data : dataList) {
@@ -82,6 +86,7 @@ public class MeizhiData {
                     subscriber.onCompleted();
                 } catch (IOException e) {
                     subscriber.onError(e);
+
                 }
 
             }
@@ -99,7 +104,7 @@ public class MeizhiData {
      * @param page
      * @return
      */
-    public Observable<List<MeizhiBean>> searchMeizhiList(final String search, final int page) {
+    public Observable<List<MeizhiBean>> getSearchMeizhiList(final String search, final int page) {
         return getRoughPicList(搜索 + search + "/", page);
     }
 
