@@ -1,7 +1,5 @@
 package lol.chendong.data.meizhi;
 
-import com.orhanobut.logger.Logger;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,35 +29,38 @@ public class MeizhiData {
     public static final String 日本 = "japan/";
     public static final String 台湾 = "taiwan/";
     public static final String 清纯妹纸 = "mm/";
-    private  static final String 搜索 = "search/";
+    private static final String 搜索 = "search/";
 
 
     private static MeizhiData ourInstance = new MeizhiData();
 
+    int detalPage; //详情页面数量
+    private int timeout = 1000 * 10; //超时时间
+    private MeizhiBean bean = new MeizhiBean();
 
     private MeizhiData() {
 
     }
 
-    public static MeizhiData getInstance() {
+    public static MeizhiData getData() {
         return ourInstance;
     }
 
     /**
-     * 获取主页列表
+     * 获取浏览图列表
      *
      * @param type
      * @param page
      * @return
      */
-    public Observable<List<MeizhiBean>> getHomeMeizhiList(final String type, final int page) {
+    public Observable<List<MeizhiBean>> getRoughPicList(final String type, final int page) {
 
         Observable<List<MeizhiBean>> meizhiOb = Observable.create(new Observable.OnSubscribe<List<MeizhiBean>>() {
             @Override
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
                 List<MeizhiBean> meizhiBeanList = new ArrayList<>();
                 try {
-                    Document doc = Jsoup.connect("http://www.mzitu.com/" + type + "page/" + page).get();
+                    Document doc = Jsoup.connect("http://www.mzitu.com/" + type + "page/" + page).timeout(timeout).get();
                     Element content = doc.getElementById("pins");
                     Elements dataList = content.getElementsByTag("li");
                     for (Element data : dataList) {
@@ -78,7 +79,7 @@ public class MeizhiData {
                         meizhiBeanList.add(mbean);
                     }
                     subscriber.onNext(meizhiBeanList);
-
+                    subscriber.onCompleted();
                 } catch (IOException e) {
                     subscriber.onError(e);
                 }
@@ -90,7 +91,6 @@ public class MeizhiData {
                 .subscribeOn(Schedulers.newThread());
 
     }
-
 
     /**
      * 搜索妹子
@@ -100,44 +100,57 @@ public class MeizhiData {
      * @return
      */
     public Observable<List<MeizhiBean>> searchMeizhiList(final String search, final int page) {
-        return getHomeMeizhiList(搜索 + search + "/", page);
+        return getRoughPicList(搜索 + search + "/", page);
+    }
+
+    private void isAgain(MeizhiBean meizhiBean) {
+        if (!meizhiBean.getUrl().equals(bean.getUrl())) {
+            bean = meizhiBean;
+            detalPage = getDetailPage(meizhiBean.getUrl());
+        }
     }
 
     /**
-     * 获取详情
+     * 获取详情（高清）
+     * 为了防止频繁请求被服务器拒绝，控制每次获取5张,再次传入相同值获取接下来五张
      *
      * @param meizhiBean
+     * @param page  minPage = 1
      * @return
      */
-    public Observable<List<MeizhiBean>> getDetailMeizhiList(final MeizhiBean meizhiBean) {
+    public Observable<List<MeizhiBean>> getDetailMeizhiList(final MeizhiBean meizhiBean, final int page) {
         Observable<List<MeizhiBean>> meizhiOb = Observable.create(new Observable.OnSubscribe<List<MeizhiBean>>() {
             @Override
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
-                List<MeizhiBean> meizhiBeanList = new ArrayList<>();
+                isAgain(meizhiBean);
                 try {
-
-                    int page = getDetailPage(meizhiBean.getUrl());
-                    Logger.d("page" + page);
-                    for (int i = 1; i <= page; i++) {
-                        MeizhiBean mbean = new MeizhiBean(meizhiBean);
-                        Document doc = Jsoup.connect(meizhiBean.getUrl() + "/" + i).get();
-                        Element img = doc.getElementsByClass("main-image").first();
-                        Element dataa = img.getElementsByTag("a").first();
-                        Element data = dataa.getElementsByTag("img").first();
-
-                        mbean.getImage().setImgUrl(data.attr("src"));
-                        meizhiBeanList.add(mbean);
+                    if (5 * page >= detalPage) {
+                        subscriber.onError(new NullPointerException("没有更多的数据了"));
+                    } else {
+                        List<MeizhiBean> meizhiBeanList = new ArrayList<>();
+                        for (int i = 1; i <= 5; i++) {
+                            MeizhiBean mbean = new MeizhiBean(bean);
+                            Document doc = Jsoup.connect(bean.getUrl() + "/" + (i + 5 * page)).get();
+                            Element img = doc.getElementsByClass("main-image").first();
+                            Element dataa = img.getElementsByTag("a").first();
+                            Element data = dataa.getElementsByTag("img").first();
+                            mbean.getImage().setImgUrl(data.attr("src"));
+                            meizhiBeanList.add(mbean);
+                        }
+                        subscriber.onNext(meizhiBeanList);
+                        subscriber.onCompleted();
                     }
-                    subscriber.onNext(meizhiBeanList);
                 } catch (IOException e) {
                     subscriber.onError(e);
                 }
             }
         });
+
         return meizhiOb
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.newThread());
     }
+
 
     /**
      * 获取详情页的页数
@@ -205,6 +218,7 @@ public class MeizhiData {
                             meizhiBeanList.add(meizhiBean);
                         }
                         subscriber.onNext(meizhiBeanList);
+                        subscriber.onCompleted();
                     } catch (IOException e) {
                         subscriber.onError(e);
                     }
@@ -241,6 +255,7 @@ public class MeizhiData {
                         }
                     }
                     subscriber.onNext(meizhiBeanList);
+                    subscriber.onCompleted();
                 } catch (IOException e) {
                     subscriber.onError(e);
                 }

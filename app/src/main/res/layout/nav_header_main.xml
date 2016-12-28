@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/nav_header_height"
+    android:background="@drawable/nav_background_green"
+    android:paddingEnd="15dp"
+    android:paddingStart="15dp"
+    android:paddingTop="44dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nav_header_height"
+        android:orientation="vertical"
+
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/nav_portrait_image"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/header_icon" />
+
+        <TextView
+            android:id="@+id/nav_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/my_name"
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/text_main" />
+
+        <TextView
+            android:id="@+id/nav_user_profiles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginTop="3dp"
+            android:text="@string/my_github_url"
+            android:textSize="@dimen/text_secondary" />
+
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/other_buttons_ly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/nav_messge_img"
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_nav_message"
+            app:civ_border_color="#86ffffff"
+            app:civ_border_width="1dp" />
+
+        <!--<de.hdodenhof.circleimageview.CircleImageView-->
+        <!--android:id="@+id/nav_setting_img"-->
+        <!--android:layout_width="29dp"-->
+        <!--android:layout_height="29dp"-->
+        <!--android:layout_margin="5dp"-->
+        <!--android:src="@drawable/ic_nav_settings" />-->
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>

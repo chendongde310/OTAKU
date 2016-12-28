@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:animationCache="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="lol.chendong.otaku.ui.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:tr_head_height="100dp"
+        app:tr_wave_height="180dp">
+
+        <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:background="@color/background" />
+
+
+    </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
+
+
+</RelativeLayout>

@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">OTAKU</string>
+    <string name="app_name">宅男神器</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">设置</string>
+    <string name="action_about">关于</string>
+    <string name="action_updata">更新</string>
+    <string name="action_search">搜索</string>
+
+
+    <!--文字字段-->
+    <string name="my_github_url">github.com/chendongde310</string>
+    <string name="my_name">此屁天下之绝响</string>
+
 </resources>

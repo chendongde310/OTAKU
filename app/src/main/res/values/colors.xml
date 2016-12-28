@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#4CAF50</color>
+    <color name="colorPrimaryDark">#388E3C</color>
+    <color name="colorAccent">#FF5722</color>
+
+    <color name="primary">#4CAF50</color>
+    <color name="primary_dark">#388E3C</color>
+    <color name="primary_light">#C8E6C9</color>
+    <color name="accent">#FF5722</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#BDBDBD</color>
+
+    <!--标签色-->
+    <color name="tag_primary">#006DCC</color>
+    <color name="tag_info">#49afcd</color>
+    <color name="tag_success">#5BB75B</color>
+    <color name="tag_warning">#FAA732</color>
+    <color name="tag_danger">#DA4F49</color>
+    <color name="tag_link">#0088CC</color>
+    <!--文字颜色-->
+    <color name="text_black">#2A2A2A</color>
+    <color name="text_gray">#686868</color>
+    <color name="text_navigation">#363636</color>
+    <color name="text_white">#c8ffffff</color>
+    <!--背景色-->
+    <color name="background">#f4f4f4</color>
+    <color name="background_secondary">#b9757575</color>
+
+    <!--nav_bar背景色-->
+    <color name="nav_bar_center">#4CAF50</color>
+    <color name="nav_bar_end">#348737</color>
+    <color name="nav_bar_start">#50d756</color>
+
+
+
+
+
+
+
 </resources>
