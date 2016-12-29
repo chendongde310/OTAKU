@@ -24,17 +24,18 @@
         <item
             android:id="@+id/nav_qingchun"
             android:title="清纯萌妹" />
+        <item
+            android:id="@+id/nav_share"
+            android:title="真人自拍" />
     </group>
 
-    <item android:title="其他">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:title="真人自拍" />
-            <item
-                android:id="@+id/nav_day"
-                android:title="每日更新" />
-        </menu>
-    </item>
+    <!--<item android:title="其他">-->
+        <!--<menu>-->
+
+            <!--<item-->
+                <!--android:id="@+id/nav_day"-->
+                <!--android:title="每日更新" />-->
+        <!--</menu>-->
+    <!--</item>-->
 
 </menu>

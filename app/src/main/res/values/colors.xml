@@ -27,6 +27,7 @@
     <color name="text_white">#c8ffffff</color>
     <!--背景色-->
     <color name="background">#f4f4f4</color>
+    <color name="background_transparent">#b9ffffff</color>
     <color name="background_secondary">#b9757575</color>
 
     <!--nav_bar背景色-->
@@ -34,10 +35,9 @@
     <color name="nav_bar_end">#348737</color>
     <color name="nav_bar_start">#50d756</color>
 
-
-
-
-
+    <color name="black_overlay">#66000000</color>
+    <color name="background_black" >#000000</color>
+    <color name="background_white" >#ffffff</color>
 
 
 </resources>

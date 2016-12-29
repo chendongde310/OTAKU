@@ -21,16 +21,19 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':data')
+
+
+
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
-
     compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.miguelcatalan:materialsearchview:1.4.0'
-
     compile 'com.facebook.fresco:fresco:1.0.0'
-
+    compile 'com.android.support:support-v4:23.4.0'
 }
+
+
 
 
 

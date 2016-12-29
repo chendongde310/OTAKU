@@ -1,5 +1,6 @@
 package lol.chendong.otaku.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -33,7 +34,8 @@ import lol.chendong.data.meizhi.MeizhiBean;
 import lol.chendong.data.meizhi.MeizhiData;
 import lol.chendong.otaku.BaseActivity;
 import lol.chendong.otaku.R;
-import lol.chendong.otaku.adapter.HomeAdapter;
+import lol.chendong.otaku.adapter.MzHomeAdapter;
+import lol.chendong.otaku.constant.Str;
 import rx.Observer;
 
 public class MainActivity extends BaseActivity
@@ -52,7 +54,7 @@ public class MainActivity extends BaseActivity
     private CircleImageView userPortraitImg;
     private TextView userNameTextView;
     private TextView userProfilesTextView;
-    private HomeAdapter mAdapter;
+    private MzHomeAdapter mAdapter;
     private int dataPage = 1; //数据页码
     private String dataType = MeizhiData.最新;
     private MaterialSearchView searchView;
@@ -64,13 +66,14 @@ public class MainActivity extends BaseActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setGetDataObserver();
         //获取默认主页
         MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
     }
 
     @Override
     public void initView() {
+       // startActivity(new Intent(MainActivity.this,ScrollPicActivity.class));
         refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refreshLayout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -98,7 +101,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void initData() {
-        setGetDataObserver();
+
         //添加旋转动画效果
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate);
         lac = new LayoutAnimationController(animation);
@@ -130,14 +133,26 @@ public class MainActivity extends BaseActivity
             public void onNext(List<MeizhiBean> meizhiBeen) {
                 data.addAll(meizhiBeen);
                 if (mAdapter == null) {
-                    mAdapter = new HomeAdapter(MainActivity.this, meizhiBeen);
+                    mAdapter = new MzHomeAdapter(MainActivity.this, data);
                     mRecyclerView.setAdapter(mAdapter);
+                    setAdapterListener();
                 } else {
                     mAdapter.addData(data);
                     Logger.d("添加数据,当前数据量" + data.size());
                 }
             }
         };
+    }
+
+    private void setAdapterListener() {
+        mAdapter.setOnItemClickListener(new MzHomeAdapter.onItemClickListener() {
+            @Override
+            public void onItemClick(View view, int postion) {
+                Intent intent = new Intent(MainActivity.this,ScrollPicActivity.class);
+                intent.putExtra(Str.MEIZHI_DATA,data.get(postion));
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -208,7 +223,6 @@ public class MainActivity extends BaseActivity
      * 播放风车动画
      */
     private void playMsgAnimation() {
-
         if (otherButtonLayout.getLayoutAnimation().isDone()) {
             otherButtonLayout.startLayoutAnimation();
         }
@@ -298,9 +312,10 @@ public class MainActivity extends BaseActivity
             dataType = MeizhiData.清纯妹纸;
         } else if (id == R.id.nav_share) {
             dataType = MeizhiData.自拍;
-        } else if (id == R.id.nav_day) {
-            dataType = MeizhiData.最新;
         }
+//        else if (id == R.id.nav_day) {
+//            dataType = MeizhiData.最新;
+//        }
         refreshData();
         drawer.closeDrawer(GravityCompat.START);
         return true;

@@ -1,6 +1,7 @@
 package lol.chendong.data.meizhi;
 
 import com.orhanobut.logger.Logger;
+import com.orhanobut.logger.Printer;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -123,12 +124,13 @@ public class MeizhiData {
      * @param page  minPage = 1
      * @return
      */
-    public Observable<List<MeizhiBean>> getDetailMeizhiList(final MeizhiBean meizhiBean, final int page) {
+    public Observable<List<MeizhiBean>> getDetailMeizhiList(final MeizhiBean meizhiBean, final int p) {
         Observable<List<MeizhiBean>> meizhiOb = Observable.create(new Observable.OnSubscribe<List<MeizhiBean>>() {
             @Override
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
                 isAgain(meizhiBean);
                 try {
+                    int page = p - 1;
                     if (5 * page >= detalPage) {
                         subscriber.onError(new NullPointerException("没有更多的数据了"));
                     } else {

@@ -1,0 +1,46 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@null">
+
+    <ImageView
+        android:id="@+id/bar_back_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:padding="3dp"
+        android:src="@drawable/ic_bar_back" />
+
+    <ImageView
+        android:id="@+id/bar_share_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:padding="3dp"
+        android:src="@drawable/ic_bar_share" />
+
+
+    <TextView
+        android:id="@+id/bar_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_toEndOf="@+id/bar_back_img"
+        android:layout_toStartOf="@+id/bar_share_img"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:text="最新最热"
+        android:textColor="@color/text_white"
+        android:textSize="@dimen/text_title" />
+
+
+</RelativeLayout>

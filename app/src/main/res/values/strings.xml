@@ -15,4 +15,10 @@
     <string name="my_github_url">github.com/chendongde310</string>
     <string name="my_name">此屁天下之绝响</string>
 
+    <string name="title_activity_album">AlbumActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_scroll_pic">ScrollPicActivity</string>
+
 </resources>
