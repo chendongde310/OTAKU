@@ -17,6 +17,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
@@ -55,6 +56,9 @@ public class MainActivity extends BaseActivity
     private int dataPage = 1; //数据页码
     private String dataType = MeizhiData.最新;
     private MaterialSearchView searchView;
+    private RelativeLayout navHeaderRl;
+    private Observer<List<MeizhiBean>> observer;
+    private String search;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,9 +89,9 @@ public class MainActivity extends BaseActivity
         userNameTextView = (TextView) headerView.findViewById(R.id.nav_user_name);
         userProfilesTextView = (TextView) headerView.findViewById(R.id.nav_user_profiles);
         userPortraitImg = (CircleImageView) headerView.findViewById(R.id.nav_portrait_image);
-
+        navHeaderRl = (RelativeLayout) headerView.findViewById(R.id.nav_header_rl);
+        //初始化RecyclerView
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
@@ -130,18 +134,24 @@ public class MainActivity extends BaseActivity
                     mRecyclerView.setAdapter(mAdapter);
                 } else {
                     mAdapter.addData(data);
-                    Logger.d("添加数据,当前数据量"+data.size());
+                    Logger.d("添加数据,当前数据量" + data.size());
                 }
             }
         };
     }
 
-    private Observer<List<MeizhiBean>> observer;
-
     @Override
     public void initListener() {
         //设置Navigation点击监听
         navigationView.setNavigationItemSelectedListener(this);
+        //设置nav头部背景监听
+        navHeaderRl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playMsgAnimation();
+            }
+        });
+        //设置fab监听
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -157,7 +167,7 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onLoadMore(final TwinklingRefreshLayout refreshLayout) {
-                getData();
+                loadData();
             }
         });
 
@@ -166,13 +176,11 @@ public class MainActivity extends BaseActivity
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-
-                if (otherButtonLayout.getLayoutAnimation().isDone()) {
-                    otherButtonLayout.startLayoutAnimation();
-                }
-
+                //TODO- 如果有信息的话就播放选择动画
+                playMsgAnimation();
             }
         });
+        //设置搜索按钮监听
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -188,7 +196,7 @@ public class MainActivity extends BaseActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText != null&&newText.length() > 0) {
+                if (newText != null && newText.length() > 0) {
                     search = newText;
                 }
                 return false;
@@ -197,16 +205,28 @@ public class MainActivity extends BaseActivity
     }
 
     /**
+     * 播放风车动画
+     */
+    private void playMsgAnimation() {
+
+        if (otherButtonLayout.getLayoutAnimation().isDone()) {
+            otherButtonLayout.startLayoutAnimation();
+        }
+    }
+
+    /**
      * 刷新数据
      */
     private void refreshData() {
         dataPage = 1;
         data.clear();
-        getData();
+        loadData();
     }
 
-
-    private void getData() {
+    /**
+     * 加载数据
+     */
+    private void loadData() {
         if (dataType.equals(MeizhiData.台湾) ||
                 dataType.equals(MeizhiData.性感) ||
                 dataType.equals(MeizhiData.推荐) ||
@@ -220,15 +240,12 @@ public class MainActivity extends BaseActivity
         } else if (dataType.equals(MeizhiData.搜索)) {
             if (search != null && search.length() > 0) {
                 MeizhiData.getData().getSearchMeizhiList(search, dataPage).subscribe(observer);
-                Logger.d("搜索:" + search);
+                Logger.d("搜索词:" + search);
             } else {
                 searchView.showSearch();
             }
         }
     }
-
-    private String search;
-
 
     @Override
     public void onBackPressed() {
@@ -239,7 +256,6 @@ public class MainActivity extends BaseActivity
         } else {
             super.onBackPressed();
         }
-
     }
 
     @Override
@@ -253,10 +269,8 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         switch (id) {
             case R.id.action_search: //搜索
-
                 break;
         }
         return true;
@@ -276,16 +290,16 @@ public class MainActivity extends BaseActivity
             dataType = MeizhiData.最新;
         } else if (id == R.id.nav_sexy) {
             dataType = MeizhiData.性感;
-        } else if (id == R.id.nav_share) {
-            dataType = MeizhiData.自拍;
-        } else if (id == R.id.nav_day) {
-            dataType = MeizhiData.最新;
         } else if (id == R.id.nav_riben) {
             dataType = MeizhiData.日本;
         } else if (id == R.id.nav_taiwan) {
             dataType = MeizhiData.台湾;
         } else if (id == R.id.nav_qingchun) {
             dataType = MeizhiData.清纯妹纸;
+        } else if (id == R.id.nav_share) {
+            dataType = MeizhiData.自拍;
+        } else if (id == R.id.nav_day) {
+            dataType = MeizhiData.最新;
         }
         refreshData();
         drawer.closeDrawer(GravityCompat.START);
