@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -26,6 +25,7 @@ import com.facebook.cache.common.CacheKey;
 import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.request.ImageRequest;
+import com.joaquimley.faboptions.FabOptions;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
@@ -45,11 +45,12 @@ import rx.Subscriber;
 public class ScrollPicActivity extends BaseActivity {
 
     private static final boolean AUTO_HIDE = true;
-    private static final int AUTO_HIDE_DELAY_MILLIS = 1000;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 400;
     private static final int UI_ANIMATION_DELAY = 150;
     private final Handler mHideHandler = new Handler();
     ImageView backButton;
     ImageView shareButton;
+    Handler dataHandler = new Handler();
     private FrameLayout.LayoutParams layoutParams;
     private RecyclerView mContentView;
     private final Runnable mHidePart2Runnable = new Runnable() {
@@ -64,7 +65,6 @@ public class ScrollPicActivity extends BaseActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private FloatingActionButton downloadImg;
     private boolean mVisible;
     private RelativeLayout toolbar;
     private TextView title;
@@ -74,11 +74,14 @@ public class ScrollPicActivity extends BaseActivity {
     private MzDetailAdapter mAdapter;
     private int dataPage = 1;//默认从第一页开始
     private boolean isShow = false; //是否显示标题栏
+    private boolean getDataToDo = false;  //防止重复获取数据的阻断器
+    private MeizhiBean choiceMzData;
+    private FabOptions fabOptions;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
             toolbar.setVisibility(View.VISIBLE);
-            downloadImg.setVisibility(View.VISIBLE);
+            fabOptions.setVisibility(View.VISIBLE);
             changeViewMargins(true);
         }
     };
@@ -88,8 +91,7 @@ public class ScrollPicActivity extends BaseActivity {
             hide();
         }
     };
-    private boolean getDataToDo = false;  //防止重复获取数据的阻断器
-    private MeizhiBean choiceMzData;
+    private int choicePostion;
 
     public static String getSDPath() {
         File sdDir = null;
@@ -134,13 +136,6 @@ public class ScrollPicActivity extends BaseActivity {
 
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scroll_pic);
-
-    }
-
     public int dip2px(float dpValue) {
         final float scale = this.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
@@ -148,15 +143,17 @@ public class ScrollPicActivity extends BaseActivity {
 
     @Override
     public void initView() {
+
         frameLayout = (FrameLayout) findViewById(R.id.scroll_pic_fl);
         toolbar = (RelativeLayout) findViewById(R.id.toolbar);
-        downloadImg = (FloatingActionButton) findViewById(R.id.pic_content_controls);
         mContentView = (RecyclerView) findViewById(R.id.pic_content_list);
         backButton = (ImageView) findViewById(R.id.bar_back_img);
         shareButton = (ImageView) findViewById(R.id.bar_share_img);
         title = (TextView) findViewById(R.id.bar_title_text);
         mContentView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
         mContentView.setItemAnimator(new DefaultItemAnimator());
+        fabOptions = (FabOptions) findViewById(R.id.fab_options);
+        //fabOptions.setButtonsMenu(this, R.menu.fab_scroll);
     }
 
     @Override
@@ -213,6 +210,7 @@ public class ScrollPicActivity extends BaseActivity {
                 mContentView.smoothScrollToPosition(postion);
                 toggle();
                 choiceMzData = dataList.get(postion);
+                choicePostion = postion;
             }
         });
     }
@@ -220,7 +218,7 @@ public class ScrollPicActivity extends BaseActivity {
     /**
      * 保存图片
      */
-    public String saveBitmap() {
+    public String saveBitmap(boolean showToast) {
         String path = "";
         ImageRequest imageRequest = ImageRequest.fromUri(choiceMzData.getImage().getImgUrl());
         CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
@@ -228,7 +226,7 @@ public class ScrollPicActivity extends BaseActivity {
         BinaryResource resource = ImagePipelineFactory.getInstance()
                 .getMainFileCache().getResource(cacheKey);
         File b = ((FileBinaryResource) resource).getFile();
-        String dirName = getSDPath() + "/otaku/";
+        String dirName = getSDPath() + "/otaku/img/";
         String fileName = "Mz" + System.currentTimeMillis() + ".jpg";
         Bitmap bmp = BitmapFactory.decodeFile(b.getPath());
         // 判断sd卡是否存在
@@ -258,6 +256,9 @@ public class ScrollPicActivity extends BaseActivity {
                 // 用完关闭
                 fos.flush();
                 fos.close();
+                if (showToast) {
+                    Toast.makeText(ScrollPicActivity.this, "图片保存成功，路径为：" + dirName + fileName, Toast.LENGTH_SHORT).show();
+                }
             } catch (IOException e) {
                 Toast.makeText(this, "保存图片失败", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
@@ -266,9 +267,8 @@ public class ScrollPicActivity extends BaseActivity {
         return path;
     }
 
-
     public void shareMsg() {
-        String imgPath = saveBitmap();
+        String imgPath = saveBitmap(false);
         String msgTitle = "福利分享";
 
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -289,20 +289,68 @@ public class ScrollPicActivity extends BaseActivity {
         startActivity(Intent.createChooser(intent, getTitle()));
     }
 
+    private void nextHandler(final long delayMillis) {
+        dataHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (getDataToDo) {
+                    nextHandler(delayMillis);
+                } else {
+                    if (choicePostion < dataList.size()) {
+                        choicePostion++;
+                        mContentView.smoothScrollToPosition(choicePostion);
+                    } else {
+                        Toast.makeText(ScrollPicActivity.this, "后面没有啦~", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }, delayMillis);
+    }
+
+
     @Override
     public void initListener() {
-        //下载图片
-        downloadImg.setOnClickListener(new View.OnClickListener() {
+        //fab监听
+        fabOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (AUTO_HIDE) {
-                    delayedHide(AUTO_HIDE_DELAY_MILLIS);
+                switch (v.getId()) {
+                    case R.id.faboptions_before: //上一张
+                        if (choicePostion > 0) {
+                            choicePostion--;
+                            mContentView.smoothScrollToPosition(choicePostion);
+                        } else {
+                            Toast.makeText(ScrollPicActivity.this, "前面没有啦~", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case R.id.faboptions_download: //下载
+                        saveBitmap(true);
+
+                        break;
+                    case R.id.faboptions_favorite: //TODO - 收藏
+                        Toast.makeText(ScrollPicActivity.this, "添加收藏", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.faboptions_next:  //下一张
+                        if (choicePostion < dataList.size()) {
+                            choicePostion++;
+                            mContentView.smoothScrollToPosition(choicePostion);
+                        } else {
+                            getData();
+                            nextHandler(300);
+                        }
+                        break;
                 }
-                 saveBitmap ();
-                Toast.makeText(ScrollPicActivity.this, "图片已经保存", Toast.LENGTH_SHORT).show();
             }
         });
-
+        //fab关闭回调
+        fabOptions.setOnCloseCallback(new FabOptions.OnCloseCallback() {
+            @Override
+            public void closeCallback() {
+                if (isShow) {
+                    delayedHide(AUTO_HIDE_DELAY_MILLIS);
+                }
+            }
+        });
         //焦点图捕捉滚动事件
         mContentView.setOnTouchListener(new View.OnTouchListener() {
             final int OFFSET = 30; // 偏移量
@@ -316,7 +364,7 @@ public class ScrollPicActivity extends BaseActivity {
                         startX = event.getX();
                     } else if (i == MotionEvent.ACTION_UP) {
                         if (this.startX <= event.getX() + OFFSET && startX >= event.getX() - OFFSET) {
-                            hide();
+                            fabOptions.close();
                         }
                     }
                     return true;
@@ -330,7 +378,7 @@ public class ScrollPicActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (isShow) {
-                    hide();
+                    fabOptions.close();
                 }
             }
         });
@@ -388,7 +436,7 @@ public class ScrollPicActivity extends BaseActivity {
 
     private void toggle() {
         if (mVisible) {
-            hide();
+            fabOptions.close();
         } else {
             show();
         }
@@ -397,16 +445,19 @@ public class ScrollPicActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (isShow) {
-            hide();
+            fabOptions.close();
         } else {
             super.onBackPressed();
         }
     }
 
     private void hide() {
+        Logger.d("隐藏GUI");
         toolbar.setVisibility(View.GONE);
-        downloadImg.setVisibility(View.GONE);
-
+        fabOptions.setVisibility(View.GONE);
+        if (fabOptions.isOpen()) {
+            fabOptions.close();
+        }
         mVisible = false;
         changeViewMargins(false);
         mHideHandler.removeCallbacks(mShowPart2Runnable);
@@ -418,7 +469,7 @@ public class ScrollPicActivity extends BaseActivity {
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
-
+        fabOptions.open();
         mHideHandler.removeCallbacks(mHidePart2Runnable);
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
@@ -427,4 +478,13 @@ public class ScrollPicActivity extends BaseActivity {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scroll_pic);
+
+    }
+
+
 }

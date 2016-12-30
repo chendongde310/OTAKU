@@ -56,7 +56,12 @@ public class MeizhiBean implements Parcelable {
     }
 
     public String getTitle() {
-        return title;
+        if(title!=null){
+            return title;
+        }else {
+            return "OTAKU-宅男福利";
+        }
+
     }
 
     public void setTitle(String title) {

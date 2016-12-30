@@ -4,38 +4,55 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_hot"
-
+            android:icon="@drawable/ic_whatshot_black_24dp"
             android:title="头条女神" />
         <item
             android:id="@+id/nav_best"
+            android:icon="@drawable/ic_star_black_24dp"
             android:title="精选妹子" />
         <item
             android:id="@+id/nav_new"
+            android:icon="@drawable/ic_star_black_24dp"
             android:title="最新福利" />
         <item
             android:id="@+id/nav_sexy"
+            android:icon="@drawable/ic_star_black_24dp"
             android:title="性感尤物" />
         <item
             android:id="@+id/nav_riben"
+            android:icon="@drawable/ic_star_black_24dp"
             android:title="岛国妹子" />
         <item
             android:id="@+id/nav_taiwan"
+            android:icon="@drawable/ic_star_black_24dp"
             android:title="台湾妹子" />
         <item
             android:id="@+id/nav_qingchun"
+            android:icon="@drawable/ic_insert_emoticon_black_24dp"
             android:title="清纯萌妹" />
         <item
             android:id="@+id/nav_share"
+            android:icon="@drawable/ic_local_see_black_24dp"
             android:title="真人自拍" />
     </group>
 
-    <!--<item android:title="其他">-->
-        <!--<menu>-->
+    <item android:title="项目持续更新">
+        <menu>
 
-            <!--<item-->
-                <!--android:id="@+id/nav_day"-->
-                <!--android:title="每日更新" />-->
-        <!--</menu>-->
-    <!--</item>-->
+            <item
+                android:id="@+id/nav_info_1"
+                android:checked="false"
+                android:title="欢迎star和关注" />
+            <item
+                android:id="@+id/nav_info_3"
+                android:checked="false"
+                android:title="@string/my_github_url" />
+            <item
+                android:id="@+id/nav_info_2"
+                android:checked="false"
+                android:title="Q:1279262533" />
+
+        </menu>
+    </item>
 
 </menu>

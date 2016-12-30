@@ -23,13 +23,14 @@
 
         <include layout="@layout/view_bar" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/pic_content_controls"
+
+        <com.joaquimley.faboptions.FabOptions
+            android:id="@+id/fab_options"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
-            android:layout_margin="@dimen/fab_margin"
             android:elevation="6dp"
+            app:button_menu="@menu/fab_scroll"
             app:srcCompat="@drawable/ic_file_download" />
 
     </FrameLayout>

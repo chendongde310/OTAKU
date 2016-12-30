@@ -18,11 +18,15 @@ import lol.chendong.data.meizhi.MeizhiBean;
 import lol.chendong.otaku.R;
 
 /**
- * 作者：陈东  —  www.renwey.com
- * 日期：2016/12/28 - 15:27
- * 注释：
+ * ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+ * ▎作者：chendong
+ * ▎www.github.com/chendongde310
+ * ▎日期：2016/12/30 - 13:55
+ * ▎注释：
+ * ▎更新内容：
+ * ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
  */
-public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHolder>  {
+public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHolder> {
 
     private Context context;
     private List<MeizhiBean> meizhiBeanList;
@@ -47,11 +51,10 @@ public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHold
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         MeizhiBean data = meizhiBeanList.get(position);
-        holder.title.setText(data.getTitle());
-        //holder.img.setImageURI(data.getImage().getImgUrl());
         setImg(holder.img, Uri.parse(data.getImage().getImgUrl()));
-
+        holder.title.setText(data.getTitle());
     }
+
 
 
     @Override
@@ -90,6 +93,15 @@ public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHold
 
     }
 
+    /**
+     * 随机宽高比
+     *
+     * @return
+     */
+    public float random() {
+        double f = Math.random();
+        return (float) (f * 0.2f + 0.5f);
+    }
 
 
     public interface onItemClickListener {
@@ -105,7 +117,9 @@ public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHold
 
         SimpleDraweeView img;  //图片
         TextView title; //标题
-        TextView viewCount;  //查看次数
+//        TextView viewCount;  //查看次数
+//        TextView time;  //时间
+//        RelativeLayout infoRl;//额外信息
         private onItemClickListener mListener;
         private onItemLongClickListener mLongClickListener;
 
@@ -114,8 +128,14 @@ public class MzHomeAdapter extends RecyclerView.Adapter<MzHomeAdapter.MyViewHold
             super(itemView);
             mListener = listener;
             mLongClickListener = longClickListener;
-            title = (TextView) itemView.findViewById(R.id.meizi_title);
             img = (SimpleDraweeView) itemView.findViewById(R.id.meizi_rough_pic);
+            title = (TextView) itemView.findViewById(R.id.meizi_title);
+
+            //因为RecyclerView性能问题，先暂时注释这几个控件
+//            viewCount = (TextView) itemView.findViewById(R.id.meizi_view_text);
+//            time = (TextView) itemView.findViewById(R.id.meizi_time_text);
+//            infoRl = (RelativeLayout) itemView.findViewById(R.id.meizi_info_rl);
+
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }

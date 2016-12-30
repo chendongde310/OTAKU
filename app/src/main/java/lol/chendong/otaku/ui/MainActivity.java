@@ -1,13 +1,13 @@
 package lol.chendong.otaku.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -38,10 +38,13 @@ import lol.chendong.otaku.adapter.MzHomeAdapter;
 import lol.chendong.otaku.constant.Str;
 import rx.Observer;
 
+import static lol.chendong.data.meizhi.MeizhiData.自拍;
+
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     List<MeizhiBean> data = new ArrayList<>();
+    Observer<List<MeizhiBean>> observer;
     private Toolbar toolbar;
     private NavigationView navigationView;
     private FloatingActionButton fab;
@@ -59,21 +62,23 @@ public class MainActivity extends BaseActivity
     private String dataType = MeizhiData.最新;
     private MaterialSearchView searchView;
     private RelativeLayout navHeaderRl;
-    private Observer<List<MeizhiBean>> observer;
     private String search;
+    private StaggeredGridLayoutManager oneLine = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+    private StaggeredGridLayoutManager twoLine = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+    private boolean isShowUI = true; // 是否显示UI
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setGetDataObserver();
+        initDataObserver();
         //获取默认主页
         MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
     }
 
     @Override
     public void initView() {
-       // startActivity(new Intent(MainActivity.this,ScrollPicActivity.class));
+        // startActivity(new Intent(MainActivity.this,ScrollPicActivity.class));
         refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refreshLayout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,12 +101,10 @@ public class MainActivity extends BaseActivity
         //初始化RecyclerView
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
     @Override
     public void initData() {
-
         //添加旋转动画效果
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate);
         lac = new LayoutAnimationController(animation);
@@ -113,7 +116,7 @@ public class MainActivity extends BaseActivity
     /**
      * 设置数据接收方法
      */
-    private void setGetDataObserver() {
+    private Observer<List<MeizhiBean>> initDataObserver() {
         observer = new Observer<List<MeizhiBean>>() {
             @Override
             public void onCompleted() {
@@ -132,25 +135,31 @@ public class MainActivity extends BaseActivity
             @Override
             public void onNext(List<MeizhiBean> meizhiBeen) {
                 data.addAll(meizhiBeen);
+
                 if (mAdapter == null) {
                     mAdapter = new MzHomeAdapter(MainActivity.this, data);
                     mRecyclerView.setAdapter(mAdapter);
                     setAdapterListener();
                 } else {
-                    mAdapter.addData(data);
-                    Logger.d("添加数据,当前数据量" + data.size());
+                    mAdapter.notifyDataSetChanged();
+                    if (dataPage == 1) {
+                        mRecyclerView.smoothScrollToPosition(0);
+                    }
                 }
             }
         };
+        return observer;
     }
 
     private void setAdapterListener() {
         mAdapter.setOnItemClickListener(new MzHomeAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
-                Intent intent = new Intent(MainActivity.this,ScrollPicActivity.class);
-                intent.putExtra(Str.MEIZHI_DATA,data.get(postion));
-                startActivity(intent);
+                if (!dataType.equals(自拍)) {
+                    Intent intent = new Intent(MainActivity.this, ScrollPicActivity.class);
+                    intent.putExtra(Str.MEIZHI_DATA, data.get(postion));
+                    startActivity(intent);
+                }
             }
         });
     }
@@ -170,9 +179,13 @@ public class MainActivity extends BaseActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //startActivity(new Intent(MainActivity.this, TestActivity.class));
+                mRecyclerView.smoothScrollToPosition(0);
             }
         });
+        //设置搜索按钮监听
+        setSearchListener();
+        //设置列表滚动监听
+        setListScrollListener();
         //设置下拉刷新、上拉加载
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
@@ -191,11 +204,70 @@ public class MainActivity extends BaseActivity
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                //TODO- 如果有信息的话就播放选择动画
+                //TODO- 如果有信息的话就播放风车动画
                 playMsgAnimation();
             }
         });
-        //设置搜索按钮监听
+
+    }
+
+    /**
+     * 设置列表滚动监听,上滑隐藏GUI，下滑显示GUI
+     */
+    private void setListScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            final int OFFSET = 30; // 偏移量
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    if (searchView.isSearchOpen()) {
+                        searchView.closeSearch();
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                if (dy > OFFSET) {
+                    if (isShowUI) {
+                        hideGUI();
+                    }
+                }
+                if (dy < -OFFSET) {
+                    if (!isShowUI) {
+                        showGUI();
+                    }
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 显示GUI
+     */
+    private void showGUI() {
+        isShowUI = true;
+        toolbar.setVisibility(View.VISIBLE);
+        fab.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * 隐藏GUI
+     */
+    private void hideGUI() {
+        isShowUI = false;
+        toolbar.setVisibility(View.GONE);
+        fab.setVisibility(View.GONE);
+
+    }
+
+    /**
+     * 设置搜索按钮监听
+     */
+    private void setSearchListener() {
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -241,6 +313,10 @@ public class MainActivity extends BaseActivity
      * 加载数据
      */
     private void loadData() {
+        //更改布局
+        if (mRecyclerView.getLayoutManager() != twoLine) {
+            mRecyclerView.setLayoutManager(twoLine);
+        }
         if (dataType.equals(MeizhiData.台湾) ||
                 dataType.equals(MeizhiData.性感) ||
                 dataType.equals(MeizhiData.推荐) ||
@@ -249,7 +325,8 @@ public class MainActivity extends BaseActivity
                 dataType.equals(MeizhiData.清纯妹纸) ||
                 dataType.equals(MeizhiData.最热)) {
             MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
-        } else if (dataType.equals(MeizhiData.自拍)) {
+        } else if (dataType.equals(自拍)) {
+            mRecyclerView.setLayoutManager(oneLine);
             MeizhiData.getData().getSharelMeizhiList(dataPage).subscribe(observer);
         } else if (dataType.equals(MeizhiData.搜索)) {
             if (search != null && search.length() > 0) {
@@ -297,28 +374,41 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_hot) {
-            dataType = MeizhiData.最热;
+            changeType( MeizhiData.最热);
         } else if (id == R.id.nav_best) {
-            dataType = MeizhiData.推荐;
+            changeType( MeizhiData.推荐);
         } else if (id == R.id.nav_new) {
-            dataType = MeizhiData.最新;
+            changeType( MeizhiData.最新);
         } else if (id == R.id.nav_sexy) {
-            dataType = MeizhiData.性感;
+            changeType( MeizhiData.性感);
         } else if (id == R.id.nav_riben) {
-            dataType = MeizhiData.日本;
+            changeType( MeizhiData.日本);
         } else if (id == R.id.nav_taiwan) {
-            dataType = MeizhiData.台湾;
+            changeType( MeizhiData.台湾);
         } else if (id == R.id.nav_qingchun) {
-            dataType = MeizhiData.清纯妹纸;
+            changeType( MeizhiData.清纯妹纸);
         } else if (id == R.id.nav_share) {
-            dataType = MeizhiData.自拍;
+            changeType(MeizhiData.自拍);
         }
-//        else if (id == R.id.nav_day) {
-//            dataType = MeizhiData.最新;
-//        }
-        refreshData();
+        else if (id == R.id.nav_info_1 ||
+                id == R.id.nav_info_2 ||
+                id == R.id.nav_info_3) {
+            Uri uri = Uri.parse("https://github.com/chendongde310/OTAKU");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        }
+
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+
+    private void changeType(String s){
+        if(!dataType.equals(s)) {
+            dataType = s;
+            refreshData();
+        }
     }
 
 

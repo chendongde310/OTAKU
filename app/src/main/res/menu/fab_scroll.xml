@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item
+        android:id="@+id/faboptions_before"
+        android:icon="@drawable/ic_navigate_before"
+        android:title="上一张" />
+
+
+    <item
+        android:id="@+id/faboptions_download"
+        android:icon="@drawable/ic_file_download"
+        android:title="下载" />
+
+    <item
+        android:id="@+id/faboptions_favorite"
+        android:icon="@drawable/ic_favorite"
+        android:title="喜欢" />
+
+    <item
+        android:id="@+id/faboptions_next"
+        android:icon="@drawable/ic_navigate_next"
+        android:title="下一张" />
+</menu>

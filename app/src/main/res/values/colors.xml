@@ -22,9 +22,10 @@
     <color name="tag_link">#0088CC</color>
     <!--文字颜色-->
     <color name="text_black">#2A2A2A</color>
-    <color name="text_gray">#686868</color>
+    <color name="text_gray">#545454</color>
     <color name="text_navigation">#363636</color>
     <color name="text_white">#c8ffffff</color>
+
     <!--背景色-->
     <color name="background">#f4f4f4</color>
     <color name="background_transparent">#b9ffffff</color>

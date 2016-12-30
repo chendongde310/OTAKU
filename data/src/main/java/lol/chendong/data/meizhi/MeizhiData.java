@@ -1,7 +1,6 @@
 package lol.chendong.data.meizhi;
 
 import com.orhanobut.logger.Logger;
-import com.orhanobut.logger.Printer;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,7 +32,7 @@ public class MeizhiData {
     public static final String 台湾 = "taiwan/";
     public static final String 清纯妹纸 = "mm/";
     public static final String 搜索 = "search/";
-    public static final String 自拍 = "";
+    public static final String 自拍 = "zipai";
 
 
     private static MeizhiData ourInstance = new MeizhiData();
@@ -121,7 +120,7 @@ public class MeizhiData {
      * 为了防止频繁请求被服务器拒绝，控制每次获取5张,再次传入相同值获取接下来五张
      *
      * @param meizhiBean
-     * @param page  minPage = 1
+     * @param p  minPage = 1
      * @return
      */
     public Observable<List<MeizhiBean>> getDetailMeizhiList(final MeizhiBean meizhiBean, final int p) {
@@ -203,6 +202,7 @@ public class MeizhiData {
      * @return
      */
     public Observable<List<MeizhiBean>> getSharelMeizhiList(final int page) {
+        Logger.d("获取自拍");
         Observable<List<MeizhiBean>> meizhiOb = Observable.create(new Observable.OnSubscribe<List<MeizhiBean>>() {
             @Override
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
@@ -219,7 +219,6 @@ public class MeizhiData {
                         for (Element data : dataList) {
                             Element img = data.getElementsByTag("img").first();
                             MeizhiBean meizhiBean = new MeizhiBean();
-                            meizhiBean.setTitle("美女自拍");
                             meizhiBean.setTime(data.getElementsByTag("a").first().text());
                             meizhiBean.setImage(new MeizhiBean.MeiZhiImage(img.attr("src")));
                             meizhiBeanList.add(meizhiBean);

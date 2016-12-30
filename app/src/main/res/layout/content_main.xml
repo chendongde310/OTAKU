@@ -5,8 +5,6 @@
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:animationCache="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="lol.chendong.otaku.ui.MainActivity"
     tools:showIn="@layout/app_bar_main">
@@ -19,11 +17,12 @@
         app:tr_wave_height="180dp">
 
         <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:overScrollMode="never"
-        android:background="@color/background" />
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="false"
+            android:background="@color/background"
+            android:overScrollMode="never" />
 
 
     </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
