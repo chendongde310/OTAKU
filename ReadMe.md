@@ -14,4 +14,12 @@
 ##进度
 妹子福利基本完成,请文明食用  (¯﹃¯)
 
+
+
 可以先star，我更新很快的   →.→
+
+
+##截图
+![截图](screenshot_1.jpg)
+![截图](screenshot_2.jpg)
+![截图](screenshot_3.jpg)
