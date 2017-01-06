@@ -314,9 +314,7 @@ public class MainActivity extends BaseActivity
      */
     private void loadData() {
         //更改布局
-        if (mRecyclerView.getLayoutManager() != twoLine) {
-            mRecyclerView.setLayoutManager(twoLine);
-        }
+
         if (dataType.equals(MeizhiData.台湾) ||
                 dataType.equals(MeizhiData.性感) ||
                 dataType.equals(MeizhiData.推荐) ||
@@ -324,11 +322,20 @@ public class MainActivity extends BaseActivity
                 dataType.equals(MeizhiData.最新) ||
                 dataType.equals(MeizhiData.清纯妹纸) ||
                 dataType.equals(MeizhiData.最热)) {
+            if (mRecyclerView.getLayoutManager() != twoLine) {
+                mRecyclerView.setLayoutManager(twoLine);
+            }
             MeizhiData.getData().getRoughPicList(dataType, dataPage).subscribe(observer);
         } else if (dataType.equals(自拍)) {
-            mRecyclerView.setLayoutManager(oneLine);
+            if (mRecyclerView.getLayoutManager() != oneLine) {
+                mRecyclerView.setLayoutManager(oneLine);
+                Logger.d("重新布局为单排");
+            }
             MeizhiData.getData().getSharelMeizhiList(dataPage).subscribe(observer);
         } else if (dataType.equals(MeizhiData.搜索)) {
+            if (mRecyclerView.getLayoutManager() != twoLine) {
+                mRecyclerView.setLayoutManager(twoLine);
+            }
             if (search != null && search.length() > 0) {
                 MeizhiData.getData().getSearchMeizhiList(search, dataPage).subscribe(observer);
                 Logger.d("搜索词:" + search);
@@ -374,23 +381,22 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_hot) {
-            changeType( MeizhiData.最热);
+            changeType(MeizhiData.最热);
         } else if (id == R.id.nav_best) {
-            changeType( MeizhiData.推荐);
+            changeType(MeizhiData.推荐);
         } else if (id == R.id.nav_new) {
-            changeType( MeizhiData.最新);
+            changeType(MeizhiData.最新);
         } else if (id == R.id.nav_sexy) {
-            changeType( MeizhiData.性感);
+            changeType(MeizhiData.性感);
         } else if (id == R.id.nav_riben) {
-            changeType( MeizhiData.日本);
+            changeType(MeizhiData.日本);
         } else if (id == R.id.nav_taiwan) {
-            changeType( MeizhiData.台湾);
+            changeType(MeizhiData.台湾);
         } else if (id == R.id.nav_qingchun) {
-            changeType( MeizhiData.清纯妹纸);
+            changeType(MeizhiData.清纯妹纸);
         } else if (id == R.id.nav_share) {
             changeType(MeizhiData.自拍);
-        }
-        else if (id == R.id.nav_info_1 ||
+        } else if (id == R.id.nav_info_1 ||
                 id == R.id.nav_info_2 ||
                 id == R.id.nav_info_3) {
             Uri uri = Uri.parse("https://github.com/chendongde310/OTAKU");
@@ -403,9 +409,8 @@ public class MainActivity extends BaseActivity
     }
 
 
-
-    private void changeType(String s){
-        if(!dataType.equals(s)) {
+    private void changeType(String s) {
+        if (!dataType.equals(s)) {
             dataType = s;
             refreshData();
         }
