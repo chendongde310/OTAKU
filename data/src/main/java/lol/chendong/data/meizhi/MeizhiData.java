@@ -9,7 +9,9 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -42,13 +44,15 @@ public class MeizhiData {
     private MeizhiBean bean = new MeizhiBean();
 
     private MeizhiData() {
-
+        headerMap.put("Referer","http://www.mzitu.com/");
+        headerMap.put("Domain-Name","mei_zi_tu_domain_name");
     }
 
     public static MeizhiData getData() {
         return ourInstance;
     }
 
+    Map<String ,String >  headerMap = new HashMap<>();
     /**
      * 获取浏览图列表
      *
@@ -63,7 +67,10 @@ public class MeizhiData {
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
                 List<MeizhiBean> meizhiBeanList = new ArrayList<>();
                 try {
-                    Document doc = Jsoup.connect("http://www.mzitu.com/" + type + "page/" + page).timeout(timeout).get();
+                    Document doc = Jsoup.connect("http://www.mzitu.com/" + type + "page/" + page)
+                            .header("Referer","http://www.mzitu.com/")
+                            .header("Domain-Name","mei_zi_tu_domain_name")
+                            .get();
                     Logger.d("http://www.mzitu.com/" + type + "page/" + page);
                     Element content = doc.getElementById("pins");
                     Elements dataList = content.getElementsByTag("li");
@@ -136,7 +143,9 @@ public class MeizhiData {
                         List<MeizhiBean> meizhiBeanList = new ArrayList<>();
                         for (int i = 1; i <= 5; i++) {
                             MeizhiBean mbean = new MeizhiBean(bean);
-                            Document doc = Jsoup.connect(bean.getUrl() + "/" + (i + 5 * page)).get();
+                            Document doc = Jsoup.connect(bean.getUrl() + "/" + (i + 5 * page))
+                                    .headers(headerMap)
+                                    .get();
                             Element img = doc.getElementsByClass("main-image").first();
                             Element dataa = img.getElementsByTag("a").first();
                             Element data = dataa.getElementsByTag("img").first();
@@ -166,7 +175,9 @@ public class MeizhiData {
      */
     private int getDetailPage(String url) {
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url)
+                    .headers(headerMap)
+                    .get();
             Element link = doc.getElementsByClass("pagenavi").first();
             Element resultLinks = link.getElementsByClass("dots").first();
             Element page = resultLinks.nextElementSibling();
@@ -213,7 +224,9 @@ public class MeizhiData {
                     subscriber.onNext(meizhiBeanList);
                 } else {
                     try {
-                        Document doc = Jsoup.connect("http://www.mzitu.com/share/comment-page-" + (maxPage - page) + "#comments").get();
+                        Document doc = Jsoup.connect("http://www.mzitu.com/share/comment-page-" + (maxPage - page) + "#comments")
+                                .headers(headerMap)
+                                .get();
                         Element link = doc.getElementById("comments");
                         Elements dataList = link.getElementsByTag("li");
                         for (Element data : dataList) {
@@ -250,7 +263,9 @@ public class MeizhiData {
             public void call(Subscriber<? super List<MeizhiBean>> subscriber) {
                 List<MeizhiBean> meizhiBeanList = new ArrayList<>();
                 try {
-                    Document doc = Jsoup.connect("http://www.mzitu.com/all").get();
+                    Document doc = Jsoup.connect("http://www.mzitu.com/all")
+                            .headers(headerMap)
+                            .get();
                     Elements link = doc.getElementsByClass("archives");
                     for (Element data : link) {
                         for (Element d : data.getElementsByTag("a")) {

@@ -6,6 +6,8 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig;
 
+import lol.chendong.otaku.utlis.ElnImageDownloaderFetcher;
+
 
 /**
  * 作者：陈东  —  www.renwey.com
@@ -25,8 +27,11 @@ public class App extends Application {
     private void initFresco() {
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
                 .setProgressiveJpegConfig(new SimpleProgressiveJpegConfig())
-
+                .setNetworkFetcher(new ElnImageDownloaderFetcher())
                 .build();
         Fresco.initialize(this,config);
     }
+
+
+
 }
